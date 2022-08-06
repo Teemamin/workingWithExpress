@@ -8,7 +8,11 @@ const products = [];
 
 router.get('/add-product',(req, res, next)=>{
     // console.log('in a middleware two');
-    res.render('add-product', {pageTitle: 'Add product', path: '/add-product'});
+    res.render('add-product',
+     {pageTitle: 'Add product',
+      path: '/add-product',
+      activeAddProduct: true
+    });
 })
 
 router.post('/product',(req, res, next)=>{
