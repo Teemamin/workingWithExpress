@@ -10,18 +10,17 @@ app.set('view engine', 'ejs');
 //this tells express where to find the templates
 app.set('views', 'views');
 
-const adminData = require('./routes/admin');
+const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const display404Controller = require('./controllers/404');
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(adminData.routes);
+app.use(adminRoutes);
 app.use(shopRoutes);
 
-app.use((req,res,next)=>{
-    res.status(404).render('404', {pageTitle: '404'});
-})
+app.use(display404Controller.display404);
 
 
 

@@ -2,25 +2,13 @@ const path = require('path');
 const express = require('express');
 const router = express.Router();
 
-const rootDir = require('../util/path');
+const productController = require('../controllers/products');
 
 const products = [];
 
-router.get('/add-product',(req, res, next)=>{
-    // console.log('in a middleware two');
-    res.render('add-product',
-     {pageTitle: 'Add product',
-      path: '/add-product',
-      activeAddProduct: true
-    });
-})
+router.get('/add-product', productController.getAddProduct)
 
-router.post('/product',(req, res, next)=>{
-    // console.log(req.body);
-    products.push({title: req.body.title});
-    res.redirect('/');
-})
+router.post('/product', productController.postAddProduct)
 
 
-exports.routes = router;
-exports.products = products;
+module.exports = router;
