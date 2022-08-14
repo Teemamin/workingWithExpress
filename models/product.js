@@ -3,38 +3,43 @@ const fs = require('fs');
 const pathUtill = require('../util/path');
 
 
+const p = path.join(pathUtill, 'data', 'products.json');
+
+const getProductsFromFile = (cb)=>{
+    fs.readFile(p, (err, fileContent)=>{
+        if(err){
+            cb([]);
+        }else{
+            cb(JSON.parse(fileContent));
+        }     
+   })    
+}
+
+
+
 module.exports = class Product{
-    constructor(t){
-        this.title = t;
+    constructor(title, imageUrl, description, price){
+        this.title = title;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.price = price;
     }
 
     save(){
-        const p = path.join(pathUtill, 'data', 'products.json');
-        //fs.readFile:It returns the contents/data stored in file or error if any
-        fs.readFile(p, (err, fileContent)=>{
-            let products = [];
-            if(!err){
-                products = JSON.parse(fileContent);
-            }
-            //pass the instance of the class (its an obj)
-            products.push(this);
+       getProductsFromFile(products=>{
+        //pass the instance of the class (its an obj)
+        products.push(this);
+        fs.writeFile(p, JSON.stringify(products), (err)=>{
+            console.log(err);
+        })
+       })
            
             // fs.writeFile() method is used to asynchronously
             // write the specified data to a file. By default, the file would be replaced if it exists.
-            fs.writeFile(p, JSON.stringify(products), (err)=>{
-                console.log(err);
-            })
-        })
     }
 
     static fetchAll(cb){
-        const p = path.join(pathUtill, 'data', 'products.json');
-        fs.readFile(p, (err, fileContent)=>{
-            if(err){
-                cb([]);
-            }
-            cb(JSON.parse(fileContent));
-        })
-        
+        getProductsFromFile(cb);
     }
+       
 }
