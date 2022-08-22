@@ -8,7 +8,8 @@ exports.getPostEditProduct = (req,res,next)=>{
     const updatedPrice = req.body.price;
     const product = new Product(prodId,updatedTittle, updatedImageUrl, updatedDescription, updatedPrice);
     product.save()
-    res.redirect('/admin/products');
+        .then(()=>res.redirect('/admin/products'))
+        .catch(err=>console.log(error));
 }
 
 exports.deleteProduct = (req,res,next)=>{
