@@ -1,5 +1,5 @@
 const path = require('path');
-
+const sequelize = require('./util/database');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -25,8 +25,9 @@ app.use(shopRoutes);
 
 app.use(display404Controller.display404);
 
-
-
-
-
-app.listen(3000);
+//get the models(db tables) if exisit else create them
+sequelize.sync().then((result)=>{
+    // console.log(result)
+    app.listen(3000);
+})
+    .catch(err=>console.log(err));
