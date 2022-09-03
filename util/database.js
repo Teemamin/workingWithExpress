@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 
 //the below will setup connection pool
 
-const sequelize = new Sequelize('node-complete','root','mygreengreen111',
+const sequelize = new Sequelize('node-complete','root','',
     {
         dialect:'mysql',
         host: 'localhost'
