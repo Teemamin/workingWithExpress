@@ -1,5 +1,7 @@
 const path = require('path');
 const sequelize = require('./util/database');
+const Product = require('./models/product');
+const User = require('./models/user');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -24,9 +26,15 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 
 app.use(display404Controller.display404);
+//this means the user created the product
+//second args is optional, it lets u define how the relationshp be managed
+Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
+//this is optional
+User.hasMany(Product);
 
 //get the models(db tables) if exisit else create them
-sequelize.sync().then((result)=>{
+//important: {force: true} is only for development, to overwirte the db tables and refelcet the new changes
+sequelize.sync({force: true}).then((result)=>{
     // console.log(result)
     app.listen(3000);
 })
