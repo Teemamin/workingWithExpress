@@ -21,6 +21,14 @@ const display404Controller = require('./controllers/404');
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use((req,res,next)=>{
+    User.findByPk(1)
+    .then(user=>{
+        req.user = user;
+        next()
+    })
+    .catch(err=>console.log(err))
+})
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
@@ -29,13 +37,25 @@ app.use(display404Controller.display404);
 //this means the user created the product
 //second args is optional, it lets u define how the relationshp be managed
 Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
-//this is optional
+//this is optional, can replace belonsTo with hasMany()
 User.hasMany(Product);
 
 //get the models(db tables) if exisit else create them
 //important: {force: true} is only for development, to overwirte the db tables and refelcet the new changes
-sequelize.sync({force: true}).then((result)=>{
+// sequelize.sync({force: true})
+sequelize.sync()
+.then((result)=>{
     // console.log(result)
+    return User.findByPk(1)
+})
+.then(user=>{
+    if(!user){
+        return User.create({name:'susu',email:'test@test.com'})
+    }
+    return user
+})
+.then(user=>{
+    // console.log(user);
     app.listen(3000);
 })
-    .catch(err=>console.log(err));
+.catch(err=>console.log(err));
