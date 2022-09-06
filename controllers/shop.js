@@ -52,27 +52,22 @@ exports.getIndex = (req, res, next)=>{
 }
 
 exports.getCart = (req, res, next)=>{
-    Cart.getCart(cart=>{
-        Product.fetchAll(products=>{
-            const cartProducts = [];
-            for(product of products){
-                const cartProductData = cart.products.find(prod=> prod.id === product.id)
-                if(cartProductData){
-                    cartProducts.push(
-                        {productData: product, qty: cartProductData.qty}
-                    );
-                }
-            }
+    req.user.getCart()
+    .then((cart)=>{
+       return cart.getProducts()
+        .then(products=>{
             res.render(
                 'shop/cart',
                 {
                     path: '/cart',
                     pageTitle: 'cart',
-                    products: cartProducts
+                    products: products
                 }
             )
-        });
-    });
+        })
+        .catch(err=>console.log(err));
+    })
+    .catch(err=>console.log(err));
     
 }
 
@@ -86,11 +81,35 @@ exports.postDeleteCart = (req,res,next)=>{
 
 exports.postCart = (req, res, next)=>{
     const prodId = req.body.productId;
-    Product.findById(
-        prodId, product=>{
-            Cart.addProduct(prodId, product.price)
-        }) 
-    res.redirect('/')
+    let fetchedCart;
+    req.user.getCart()
+    .then(cart=>{
+        //to make sure cart is available to the entire function
+        fetchedCart = cart
+       return cart.getProducts({where:{id: prodId}})
+    })
+    .then(products=>{
+        let product;
+        if(products.length > 0){
+            product = products[0]
+        }
+        let newQty = 1
+        if(product){
+            //if the product is already in the cart
+            const oldQty = product.cartItem.quantity
+            newQty = oldQty + 1
+            return fetchedCart.addProduct(product,{through:{quantity:newQty}})
+        }
+        //if it reaches here, that means the product is not in the cart yet
+        return Product.findByPk(prodId).then(prdct=>{
+            //addProduct is a method provided by sequelize for manytomany relshp
+            return fetchedCart.addProduct(prdct,{through: {quantity: newQty}})
+        }).catch(err=>console.log(err))
+    })
+    .then(()=>{
+        res.redirect('/cart')
+    })
+    .catch(err=>console.log(err))
 }
 
 exports.getOrders = (req, res, next)=>{
