@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const db = require('../util/database').getDb;
 
 exports.getPostEditProduct = (req,res,next)=>{
     const prodId = req.body.productId;
@@ -6,16 +7,14 @@ exports.getPostEditProduct = (req,res,next)=>{
     const updatedImageUrl = req.body.imageUrl;
     const updatedDescription = req.body.description;
     const updatedPrice = req.body.price;
-    Product.findByPk(prodId)
-    .then(product=>{
-        product.tittle = updatedTittle;
-        product.imageUrl = updatedImageUrl;
-        product.description = updatedDescription;
-        product.price = updatedPrice;
-        return product.save();
-    })
-    //the second then would handle sucess for the save()
-    //the catch will work for the first and secon then (promise)
+    const product = new Product(
+        updatedTittle,
+        updatedPrice,
+        updatedImageUrl,
+        updatedDescription,
+        prodId
+    )
+    product.save()
     .then(result=>{
         console.log('updated product!')
         res.redirect('/admin/products');
@@ -25,16 +24,22 @@ exports.getPostEditProduct = (req,res,next)=>{
 
 exports.deleteProduct = (req,res,next)=>{
     const prodId = req.body.productId;
+    Product.deleteProduct(prodId)
+    .then(() => {
+        console.log('DESTROYED PRODUCT');
+        res.redirect('/admin/products');
+      })
+      .catch(err => console.log(err));
 
-    Product.findByPk(prodId)
-    .then(product=>{
-        return product.destroy();
-    })
-    .then(result=>{
-        console.log('Product Deleted sucessfully!')
-        res.redirect('/');
-    })
-    .catch(err=>console.log(err))
+    // Product.findByPk(prodId)
+    // .then(product=>{
+    //     return product.destroy();
+    // })
+    // .then(result=>{
+    //     console.log('Product Deleted sucessfully!')
+    //     res.redirect('/');
+    // })
+    // .catch(err=>console.log(err))
 }
 
 exports.getAddProduct = (req, res, next)=>{
@@ -52,14 +57,9 @@ exports.postAddProduct = (req, res, next)=>{
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
     const price = req.body.price;
-    //req.user is the user instance we setup in app.js which is a sequelze user object
-    //sequelize adds the the createProduct method as a result of belongsToMany()
-    req.user.createProduct({
-        tittle: tittle,
-        imageUrl: imageUrl,
-        description: description,
-        price: price
-    }).then(result=>{
+    const product = new Product(tittle,price,imageUrl,description)
+    product.save()
+    .then(result=>{
         console.log('Product successfully created')
         res.redirect('/admin/products')
     })
@@ -72,10 +72,9 @@ exports.getEditProduct = (req, res, next)=>{
         return res.redirect('/');  
     }
     const prodId = req.params.productId;
-     req.user.getProducts({where:{id:prodId}})
-    // Product.findByPk(prodId)
-        .then( products=>{
-            const product = products[0]
+    //  req.user.getProducts({where:{id:prodId}})
+    Product.findById(prodId)
+        .then( product=>{
             if(!product){
                 return res.redirect('/')
             }
@@ -93,8 +92,9 @@ exports.getEditProduct = (req, res, next)=>{
 }
 
 exports.getProducts = (req, res, next)=>{
-    req.user.getProducts()
-    // Product.findAll()
+    // req.user.getProducts()
+    // let products = db().collection('products').find().toArray()
+    let products = Product.fetchAll()
     .then((products)=>{
         res.render('admin/products', 
         {
