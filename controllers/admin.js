@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const User = require('../models/user');
 const db = require('../util/database').getDb;
 
 exports.getPostEditProduct = (req,res,next)=>{
@@ -57,7 +58,7 @@ exports.postAddProduct = (req, res, next)=>{
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
     const price = req.body.price;
-    const product = new Product(tittle,price,imageUrl,description)
+    const product = new Product(tittle,price,imageUrl,description,null,req.user._id)
     product.save()
     .then(result=>{
         console.log('Product successfully created')
@@ -94,7 +95,7 @@ exports.getEditProduct = (req, res, next)=>{
 exports.getProducts = (req, res, next)=>{
     // req.user.getProducts()
     // let products = db().collection('products').find().toArray()
-    let products = Product.fetchAll()
+    Product.fetchAll()
     .then((products)=>{
         res.render('admin/products', 
         {

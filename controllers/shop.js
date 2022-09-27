@@ -75,7 +75,16 @@ exports.getIndex = (req, res, next)=>{
 //     }catch(err){console.log(err)}
 // }
 
-// exports.postCart = async (req, res, next)=>{
+exports.postCart = async (req, res, next)=>{
+    try{
+        const {productId} = req.body;
+        const product = await Product.findById(productId)
+        const cart = await req.user.addToCart(product)
+        console.log('in cart')
+        console.log(cart)
+    }catch(err){
+        console.log(err)
+    }
 //     try{
 //      const {productId} = req.body;
 //      const cart = await req.user.getCart()
@@ -101,7 +110,7 @@ exports.getIndex = (req, res, next)=>{
 //      await cart.addProduct(product,{through: {quantity: quantity}})
 //      await res.redirect('/cart')
 //     }catch(err){console.log(err)}
-//  }
+ }
  
 // exports.getOrders = async (req, res, next)=>{
 //     const orders = await req.user.getOrders({include:['products']});
