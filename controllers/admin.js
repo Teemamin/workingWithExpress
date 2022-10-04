@@ -25,7 +25,9 @@ exports.getPostEditProduct = (req,res,next)=>{
 
 exports.deleteProduct = (req,res,next)=>{
     const prodId = req.body.productId;
-    Product.deleteProduct(prodId)
+    const userId = req.user._id
+    console.log(userId)
+    Product.deleteProduct(prodId,userId)
     .then(() => {
         console.log('DESTROYED PRODUCT');
         res.redirect('/admin/products');

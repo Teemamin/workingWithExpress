@@ -83,18 +83,18 @@ exports.postCart = async (req, res, next)=>{
     }
  }
  
-// exports.getOrders = async (req, res, next)=>{
-//     const orders = await req.user.getOrders({include:['products']});
-//     console.log(orders)
-//     await res.render(
-//         'shop/orders',
-//         {
-//             path: '/orders',
-//             pageTitle: 'Orders',
-//             orders: orders
-//         }
-//     )
-// }
+exports.getOrders = async (req, res, next)=>{
+    const orders = await req.user.getOrders();
+    console.log(orders)
+    await res.render(
+        'shop/orders',
+        {
+            path: '/orders',
+            pageTitle: 'Orders',
+            orders: orders
+        }
+    )
+}
 
 
 // exports.getCheckout = (req, res, next)=>{
@@ -107,17 +107,10 @@ exports.postCart = async (req, res, next)=>{
 //     )
 // }
 
-// exports.postOrder = async (req,res,next)=>{
-//     try{
-//         const cart = await req.user.getCart();
-//         const products = await cart.getProducts();
-//         const order = await req.user.createOrder();
-//         await order.addProducts(products.map(product=>{
-//             product.orderItem = {quantity:product.cartItem.quantity}
-//             return product
-//         }));
-//         await cart.setProducts(null);
-//         await res.redirect('/orders')
-//     }catch(err){console.log(err)}
+exports.postOrder = async (req,res,next)=>{
+    try{
+        await req.user.addOrder();
+        await res.redirect('/orders')
+    }catch(err){console.log(err)}
 
-// }
+}

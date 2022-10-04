@@ -68,6 +68,35 @@ class User{
             { _id: new ObjectId(this._id) }, { $set: {cart: {items: updatedCartItems}} })
 
     }
+
+    addOrder(){
+        const db = getDb();
+        return this.getCart()
+        .then(products=>{
+            const order = {
+                items : products,
+                user: {
+                    _id: new ObjectId(this._id),
+                    name: this.username,
+                    email: this.email
+                }
+            }
+            return db.collection('orders').insertOne(order)
+        })
+        .then(result=>{
+            //on this class set the items array to empty
+            this.cart = {items: []}
+            //empty the items array in the db aswell
+            return db.collection('users').updateOne(
+                { _id: new ObjectId(this._id) }, { $set: {cart: {items: []}} })
+        })
+    }
+    getOrders(){
+        const db = getDb();
+        //mongodb lets you access nested properties by adding "" qoutes, the path to the property
+        // eg" "user._id" check user and the _id, used toArray cos its returning multiple itms
+        return db.collection('orders').find({"user._id": new ObjectId(this._id) }).toArray()
+    }
     static findById(userId){
         const db = getDb();
         return db.collection('users').findOne({_id:new ObjectId(userId)})

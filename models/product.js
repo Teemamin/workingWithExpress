@@ -53,11 +53,18 @@ class Product{
         .catch(err=>console.log(err))
     }
 
-    static async deleteProduct(prodId){
+    static async deleteProduct(prodId,userId){
         try{
             const db = getDb()
             const productCollection = db.collection('products')
             const result = await productCollection.deleteOne({_id:new mongodb.ObjectId(prodId)});
+            await db.collection('users').updateOne(
+              { _id: new ObjectId(userId) },
+              {
+                $pull: {
+                  'cart.items': { productId: new ObjectId(prodId) },
+                },
+              })
             if (result.deletedCount === 1) {
                 console.log("Successfully deleted one document.");
               } else {
