@@ -34,7 +34,7 @@ app.use((req,res,next)=>{
 app.use(display404Controller.display404);
 
 
-mongoose.connect('mongodb+srv://susu:surimama@cluster0.ndona.mongodb.net/shop?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv:')
 .then(result=>{
     app.listen(3000);
 })
