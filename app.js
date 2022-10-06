@@ -10,13 +10,14 @@ app.set('view engine', 'ejs');
 //this tells express where to find the templates
 app.set('views', 'views');
 
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
+// const adminRoutes = require('./routes/admin');
+// const shopRoutes = require('./routes/shop');
 const display404Controller = require('./controllers/404');
-const mongoConnect = require('./util/database');
+
 
 
 app.use(bodyParser.urlencoded({extended:false}));
+const mongoose = require('mongoose');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((req,res,next)=>{
     User.findById('6335fccdbcfbdbae9e753172')
@@ -27,11 +28,14 @@ app.use((req,res,next)=>{
     .catch(err=>console.log(err))
 })
 
-app.use('/admin', adminRoutes);
-app.use(shopRoutes);
+// app.use('/admin', adminRoutes);
+// app.use(shopRoutes);
 
 app.use(display404Controller.display404);
 
-mongoConnect.mongoConnect(()=>{
+
+mongoose.connect('mongodb+srv://susu:surimama@cluster0.ndona.mongodb.net/shop?retryWrites=true&w=majority')
+.then(result=>{
     app.listen(3000);
 })
+.catch(err=>console.log(err))
