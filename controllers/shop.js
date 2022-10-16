@@ -1,4 +1,6 @@
 const Product = require('../models/product');
+const Order = require('../models/order');
+const User = require('../models/user');
 const db = require('../util/database').getDb
 // const Cart = require('../models/cart');
 
@@ -6,7 +8,7 @@ const db = require('../util/database').getDb
 
 
 exports.getProducts = (req, res, next)=>{
-    Product.fetchAll()
+    Product.find()
     .then((products)=>{
         res.render(
             'shop/product-list',
@@ -34,7 +36,7 @@ exports.getProduct = (req, res, next) => {
   };
 
 exports.getIndex = (req, res, next)=>{
-    Product.fetchAll()
+    Product.find()
         .then((products)=>{
             res.render(
                 'shop/index',
@@ -51,25 +53,33 @@ exports.getIndex = (req, res, next)=>{
 
 exports.getCart = async (req, res, next)=>{
     try{
-        const products = await req.user.getCart()
+        const products = await req.user.getCart().populate('items.productId')
+        // console.log(products.items)
         return await res.render(
             'shop/cart',
             {
                 path: '/cart',
                 pageTitle: 'cart',
-                products: products
+                products: products.items
             }
         )
     }catch(err){console.log(err)};
     
 }
 
-exports.postDeleteCart = async (req,res,next)=>{
-    try{
+exports.postDeleteCart =  (req,res,next)=>{
+    // try{
         const productId = req.body.productId;
-        await req.user.deleteItemFromCart(productId)
-        return await res.redirect('/cart');
-    }catch(err){console.log(err)}
+        console.log(productId)
+    //     await req.user.deleteItemFromCart(productId)
+    //     return await res.redirect('/cart');
+    // }catch(err){console.log(err)}
+    req.user.deleteItemFromCart(productId)
+    .then(result=>{
+        console.log('done')
+        res.redirect('/cart');
+    }).catch(err=>console.log(err)) 
+
 }
 
 exports.postCart = async (req, res, next)=>{
@@ -108,8 +118,21 @@ exports.getOrders = async (req, res, next)=>{
 // }
 
 exports.postOrder = async (req,res,next)=>{
+   
     try{
-        await req.user.addOrder();
+        const cartProducts = await req.user.getCart().populate('items.productId')
+        const orderItems = cartProducts.items.map(itm=>{
+            return {product: itm.productId, qty:itm.qty}
+        })
+        const order =  new Order({
+            products:orderItems,
+            user:{
+                username: req.user.username,
+                userId: req.user
+            }
+        })
+        await order.save()
+        await req.user.clearCart()
         await res.redirect('/orders')
     }catch(err){console.log(err)}
 

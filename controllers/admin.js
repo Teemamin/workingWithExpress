@@ -1,6 +1,6 @@
 const Product = require('../models/product');
-const User = require('../models/user');
-const db = require('../util/database').getDb;
+// const User = require('../models/user');
+// const db = require('../util/database').getDb;
 
 exports.getPostEditProduct = (req,res,next)=>{
     const prodId = req.body.productId;
@@ -8,14 +8,16 @@ exports.getPostEditProduct = (req,res,next)=>{
     const updatedImageUrl = req.body.imageUrl;
     const updatedDescription = req.body.description;
     const updatedPrice = req.body.price;
-    const product = new Product(
-        updatedTittle,
-        updatedPrice,
-        updatedImageUrl,
-        updatedDescription,
-        prodId
-    )
-    product.save()
+    Product.findById(prodId)
+    .then(product=>{
+        //here product will be a full mongoose obj with all the methods availble
+        product.tittle = updatedTittle
+        product.price = updatedPrice
+        product.imageUrl = updatedImageUrl
+        product.description = updatedDescription
+//calling save will do an updated behind the scenes not create a new objct
+        product.save()
+    })  
     .then(result=>{
         console.log('updated product!')
         res.redirect('/admin/products');
@@ -27,22 +29,13 @@ exports.deleteProduct = (req,res,next)=>{
     const prodId = req.body.productId;
     const userId = req.user._id
     console.log(userId)
-    Product.deleteProduct(prodId,userId)
+    Product.findByIdAndRemove(prodId)
     .then(() => {
         console.log('DESTROYED PRODUCT');
         res.redirect('/admin/products');
       })
       .catch(err => console.log(err));
 
-    // Product.findByPk(prodId)
-    // .then(product=>{
-    //     return product.destroy();
-    // })
-    // .then(result=>{
-    //     console.log('Product Deleted sucessfully!')
-    //     res.redirect('/');
-    // })
-    // .catch(err=>console.log(err))
 }
 
 exports.getAddProduct = (req, res, next)=>{
@@ -60,7 +53,13 @@ exports.postAddProduct = (req, res, next)=>{
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
     const price = req.body.price;
-    const product = new Product(tittle,price,imageUrl,description,null,req.user._id)
+    const product = new Product({
+        tittle:tittle,
+        price: price,
+        imageUrl: imageUrl,
+        description: description,
+        userId: req.user
+    })
     product.save()
     .then(result=>{
         console.log('Product successfully created')
@@ -75,7 +74,6 @@ exports.getEditProduct = (req, res, next)=>{
         return res.redirect('/');  
     }
     const prodId = req.params.productId;
-    //  req.user.getProducts({where:{id:prodId}})
     Product.findById(prodId)
         .then( product=>{
             if(!product){
@@ -96,9 +94,9 @@ exports.getEditProduct = (req, res, next)=>{
 
 exports.getProducts = (req, res, next)=>{
     // req.user.getProducts()
-    // let products = db().collection('products').find().toArray()
-    Product.fetchAll()
+    Product.find()
     .then((products)=>{
+        // console.log(products)
         res.render('admin/products', 
         {
          prods: products,

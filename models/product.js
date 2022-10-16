@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const productSchema = new Schema({
-  title: {
+  tittle: {
     type: String,
     required: true
   },
@@ -17,8 +17,16 @@ const productSchema = new Schema({
   description: {
     type: String,
     required: true
+  },
+  userId: {
+    type:  Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
+
 });
+
+module.exports = mongoose.model('Product', productSchema);
 
 // const mongodb = require('mongodb');
 // const getDb = require('../util/database').getDb;
@@ -104,4 +112,4 @@ const productSchema = new Schema({
 
 
 
-module.exports = Product;
+// module.exports = Product;
