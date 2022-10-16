@@ -35,7 +35,7 @@ app.use(shopRoutes);
 app.use(display404Controller.display404);
 
 
-mongoose.connect('mongodb+srv://susu:surimama@cluster0.ndona.mongodb.net/shop?retryWrites=true&w=majority')
+mongoose.connect('')
 .then(result=>{
     //findOne if no args passd it will always return the first match it finds
     User.findOne().then(user=>{
