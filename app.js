@@ -19,6 +19,7 @@ const display404Controller = require('./controllers/404');
 app.use(bodyParser.urlencoded({extended:false}));
 const mongoose = require('mongoose');
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use((req,res,next)=>{
     User.findById('6341a713f3d3a66c0816c17a')
     //the user here is a full mongoose obj

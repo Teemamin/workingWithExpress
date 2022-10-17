@@ -58,20 +58,5 @@ userSchema.methods.clearCart = function(){
   return this.save();
 }
 
-userSchema.methods. addOrder = function(){
-    const products = this.cart.populate('items.productId')
-    const order = {
-        items : products.items,
-        user: {
-            _id: this._id,
-            name: this.username,
-            email: this.email
-        }
-    }
-    //create order collection
-    //clear the cart
-    return order
 
-
-}
 module.exports = mongoose.model('User', userSchema);

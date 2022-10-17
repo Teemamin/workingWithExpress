@@ -94,7 +94,7 @@ exports.postCart = async (req, res, next)=>{
  }
  
 exports.getOrders = async (req, res, next)=>{
-    const orders = await req.user.getOrders();
+    const orders = await Order.find({ 'user.userId': req.user._id })
     console.log(orders)
     await res.render(
         'shop/orders',
@@ -122,7 +122,10 @@ exports.postOrder = async (req,res,next)=>{
     try{
         const cartProducts = await req.user.getCart().populate('items.productId')
         const orderItems = cartProducts.items.map(itm=>{
-            return {product: itm.productId, qty:itm.qty}
+            // _doc returns a plain JSON Object. It has no methods or other functions attached. It's just the data. As we don't need any mongoose functions during this call this use case makes sense.
+            //It helps lower the overhead on the node server performing this action.
+            //with ._doc we get just the data
+            return {product: {...itm.productId._doc}, qty:itm.qty}
         })
         const order =  new Order({
             products:orderItems,
