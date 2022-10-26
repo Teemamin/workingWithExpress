@@ -21,10 +21,13 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.0",
+    "connect-mongodb-session": "^3.1.1",
     "ejs": "^3.1.8",
     "express": "^4.17.3",
     "express-handlebars": "^3.0.2",
+    "express-session": "^1.17.3",
     "mongodb": "^4.9.1",
     "mongoose": "^6.6.5",
     "mysql2": "^2.3.3",

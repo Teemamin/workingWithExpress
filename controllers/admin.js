@@ -27,7 +27,7 @@ exports.getPostEditProduct = (req,res,next)=>{
 
 exports.deleteProduct = (req,res,next)=>{
     const prodId = req.body.productId;
-    const userId = req.user._id
+    const userId = req.session.user._id
     console.log(userId)
     Product.findByIdAndRemove(prodId)
     .then(() => {
@@ -44,7 +44,8 @@ exports.getAddProduct = (req, res, next)=>{
       pageTitle: 'Add product',
       path: '/admin/add-product',
       activeAddProduct: true,
-      editing: false
+      editing: false,
+      isAuthenticated: req.session.isLoggedIn
     });
 }
 
@@ -58,7 +59,8 @@ exports.postAddProduct = (req, res, next)=>{
         price: price,
         imageUrl: imageUrl,
         description: description,
-        userId: req.user
+        userId: req.user,
+        isAuthenticated: req.session.isLoggedIn
     })
     product.save()
     .then(result=>{
@@ -85,7 +87,8 @@ exports.getEditProduct = (req, res, next)=>{
              pageTitle: 'Edit product',
              path: '/admin/edit-product',
              editing: editMode,
-             product: product
+             product: product,
+             isAuthenticated: req.session.isLoggedIn
            });
         })
         .catch(err=>console.log(err));
@@ -103,7 +106,8 @@ exports.getProducts = (req, res, next)=>{
          pageTitle: 'Admin Products',
          path: '/admin/products',
          hasProducts: products.length > 0,
-         activeShop: true
+         activeShop: true,
+         isAuthenticated: req.session.isLoggedIn
          })
         })
     .catch(err=>console.log(err))

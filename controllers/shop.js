@@ -1,7 +1,5 @@
 const Product = require('../models/product');
 const Order = require('../models/order');
-const User = require('../models/user');
-const db = require('../util/database').getDb
 // const Cart = require('../models/cart');
 
 
@@ -15,7 +13,8 @@ exports.getProducts = (req, res, next)=>{
             {
                 path: '/products',
                 prods: products,
-                pageTitle: 'All Products'
+                pageTitle: 'All Products',
+                isAuthenticated: req.session.isLoggedIn
             }
         )
     })
@@ -28,8 +27,9 @@ exports.getProduct = (req, res, next) => {
     .then(product => {
       res.render('shop/product-detail', {
         product: product,
-        pageTitle: product.title,
-        path: '/products'
+        pageTitle: product.tittle,
+        path: '/products',
+        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => console.log(err));
@@ -43,7 +43,8 @@ exports.getIndex = (req, res, next)=>{
                 {
                     path: '/products',
                     prods: products,
-                    pageTitle: 'Index Page'
+                    pageTitle: 'Index Page',
+                    isAuthenticated: req.session.isLoggedIn
                 }
             )
         })
@@ -60,7 +61,8 @@ exports.getCart = async (req, res, next)=>{
             {
                 path: '/cart',
                 pageTitle: 'cart',
-                products: products.items
+                products: products.items,
+                isAuthenticated: req.session.isLoggedIn
             }
         )
     }catch(err){console.log(err)};
@@ -101,7 +103,8 @@ exports.getOrders = async (req, res, next)=>{
         {
             path: '/orders',
             pageTitle: 'Orders',
-            orders: orders
+            orders: orders,
+            isAuthenticated: req.session.isLoggedIn
         }
     )
 }
