@@ -44,7 +44,8 @@ exports.getIndex = (req, res, next)=>{
                     path: '/products',
                     prods: products,
                     pageTitle: 'Index Page',
-                    isAuthenticated: req.session.isLoggedIn
+                    isAuthenticated: req.session.isLoggedIn,
+                    csrfToken: req.csrfToken()
                 }
             )
         })
@@ -133,7 +134,7 @@ exports.postOrder = async (req,res,next)=>{
         const order =  new Order({
             products:orderItems,
             user:{
-                username: req.user.username,
+                username: req.user.email,
                 userId: req.user
             }
         })
