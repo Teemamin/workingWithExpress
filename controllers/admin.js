@@ -10,6 +10,9 @@ exports.getPostEditProduct = (req,res,next)=>{
     const updatedPrice = req.body.price;
     Product.findById(prodId)
     .then(product=>{
+        if(product.userId.toString() !== req.user._id.toString()){
+            res.redirect('/')
+        }
         //here product will be a full mongoose obj with all the methods availble
         product.tittle = updatedTittle
         product.price = updatedPrice
@@ -17,19 +20,19 @@ exports.getPostEditProduct = (req,res,next)=>{
         product.description = updatedDescription
 //calling save will do an updated behind the scenes not create a new objct
         product.save()
+        .then(result=>{
+            console.log('updated product!')
+            res.redirect('/admin/products');
+        })
     })  
-    .then(result=>{
-        console.log('updated product!')
-        res.redirect('/admin/products');
-    })
     .catch(err=>console.log.log(err))
 }
 
 exports.deleteProduct = (req,res,next)=>{
     const prodId = req.body.productId;
     const userId = req.session.user._id
-    console.log(userId)
-    Product.findByIdAndRemove(prodId)
+    // console.log(userId)
+    Product.deleteOne({_id: prodId, userId: req.user._id})
     .then(() => {
         console.log('DESTROYED PRODUCT');
         res.redirect('/admin/products');
@@ -97,7 +100,7 @@ exports.getEditProduct = (req, res, next)=>{
 
 exports.getProducts = (req, res, next)=>{
     // req.user.getProducts()
-    Product.find()
+    Product.find({userId: req.user._id})
     .then((products)=>{
         // console.log(products)
         res.render('admin/products', 
