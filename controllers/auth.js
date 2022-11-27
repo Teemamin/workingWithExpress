@@ -28,17 +28,18 @@ exports.postSignup = (req, res, next) => {
             path: '/signup',
             pageTitle: 'Signup Page',
             isAuthenticated: req.session.isLoggedIn,
-            errorMessage: errors.array()[0].msg
+            errorMessage: errors.array()[0].msg,
+            oldUserInput: {
+                email: email,
+                password: password,
+                confirmPassword: req.body.confirmPassword
+            },
+            validationErrors: errors.array()
         }
         );
       }
-    User.findOne({email:email})
-    .then(userDoc=>{
-        if(userDoc){
-            req.flash('error','user aready exist')
-           return res.redirect('/signup');
-        }
-        return bcrypt.hash(password,12)
+   
+        bcrypt.hash(password,12)
         //bcrypt returns a promise, it is an asycrns action
         .then(hashedPassword=>{
             //create user after hashing password
@@ -63,9 +64,6 @@ exports.postSignup = (req, res, next) => {
         }).catch(err => {
             console.log(err);
           });
-    })
-    
-    .catch(err=>console.log(err))
 }
 
 exports.getSignup = (req, res, next) => {
@@ -81,7 +79,13 @@ exports.getSignup = (req, res, next) => {
             path: '/signup',
             pageTitle: 'Signup Page',
             isAuthenticated: req.session.isLoggedIn,
-            errorMessage: message
+            errorMessage: message,
+            oldUserInput: {
+                email: '',
+                password: '',
+                confirmPassword: ''
+            },
+            validationErrors: []
         }
     )
 };
@@ -100,10 +104,15 @@ exports.getLogin = (req,res,next)=>{
             path: '/login',
             pageTitle: 'Login Page',
             isAuthenticated: req.session.isLoggedIn,
-            errorMessage: message
+            errorMessage: message,
             //errorMessage: req.flash('error') 
             //this will pul out what we saved in error, see postLogin
             //after using the flash message it is then removed from the session
+            oldUserInput: {
+                email: '',
+                password: ''
+            },
+            validationErrors: []
         }
     )
 }
@@ -111,14 +120,42 @@ exports.getLogin = (req,res,next)=>{
 exports.postLogin = (req,res,next)=>{
     // res.setHeader('Set-Cookie', 'isLoggedIn = true')
     //session saves data across requests but not across users
+    const errors = validationResult(req)
+    if(!errors.isEmpty()){
+        return res.status(422).render(
+            'auth/login',
+            {
+                path: '/login',
+                pageTitle: 'Login Page',
+                isAuthenticated: req.session.isLoggedIn,
+                errorMessage: errors.array()[0].msg,
+                oldUserInput: {
+                    email: req.body.email,
+                    password: req.body.email
+                },
+                validationErrors: errors.array()
+            }
+        )   
+    }
     const email = req.body.email;
     const password = req.body.password;
     User.findOne({ email: email })
       .then(user => {
         if (!user) {
-            //flash takes key and value as args "error can be named anything"
-            req.flash('error','invalid email or password')
-          return res.redirect('/login');
+          return res.status(422).render(
+            'auth/login',
+            {
+                path: '/login',
+                pageTitle: 'Login Page',
+                isAuthenticated: req.session.isLoggedIn,
+                errorMessage: 'invalid email or password',
+                oldUserInput: {
+                    email: req.body.email,
+                    password: req.body.email
+                },
+                validationErrors: []
+            }
+        )   
         }
         //if the code makes it here: a user with the email addrss was found
         bcrypt
@@ -136,7 +173,20 @@ exports.postLogin = (req,res,next)=>{
                 res.redirect('/');
               });
             }
-            res.redirect('/login');
+            return res.status(422).render(
+                'auth/login',
+                {
+                    path: '/login',
+                    pageTitle: 'Login Page',
+                    isAuthenticated: req.session.isLoggedIn,
+                    errorMessage: 'invalid email or password',
+                    oldUserInput: {
+                        email: req.body.email,
+                        password: req.body.email
+                    },
+                    validationErrors: []
+                }
+            ) 
           })
           .catch(err => {
             //with compare we will only face err if something goes wrong not if the passswrd doesnt match
